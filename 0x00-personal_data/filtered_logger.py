@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+""" Obfuscate messages """
+import re
+
 
 def filter_datum(fields, redaction, message, separator):
-    import re; return re.sub(r'({})'.format('|'.join(fields)), redaction, message)
+    """ returns the log message obfuscated """
+    return re.sub(r'({})'.format('|'.join(fields)), redaction, message)
