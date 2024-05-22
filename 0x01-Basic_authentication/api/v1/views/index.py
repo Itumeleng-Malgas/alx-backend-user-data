@@ -33,3 +33,12 @@ def abort_401() -> str:
       - HTTP status code for a request unauthorized
     """
     abort(401)
+
+
+@app_views.route('/forbidden', methods=['GET'], strict_slashes=False)
+def abort_403() -> str:
+    """ GET /api/v1/forbidden
+    Return:
+      - HTTP status code for a request where the user is forbidden
+    """
+    abort(403)
