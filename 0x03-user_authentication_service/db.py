@@ -6,8 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound, InvalidRequestError
 
 from typing import Dict, Union
 from user import Base, User
@@ -45,31 +44,13 @@ class DB:
     def find_user_by(self, *args, **kwargs) -> Union[User, None]:
         """Searches for a user by the provided keyword arguments."""
 
-        if not kwargs:
-            raise NoResultFound("No search criteria provided.")
-
-        valid_keys = {'email', 'id', 'hashed_password', 'session_id', 'reset_token'}
-        invalid_keys = set(kwargs.keys()) - valid_keys
-        if invalid_keys:
-            raise InvalidRequestError(f"Invalid search keys provided: {', '.join(invalid_keys)}")
-
-        query = self._session.query(User)
-        for key in kwargs:
-            if key == 'email':
-                query = query.filter(User.email == kwargs[key])
-            elif key == 'id':
-                query = query.filter(User.id == kwargs[key])
-            elif key == 'hashed_password':
-                query = query.filter(User.hashed_password == kwargs[key])
-            elif key == 'session_id':
-                query = query.filter(User.session_id == kwargs[key])
-            elif key == 'reset_token':
-                query = query.filter(User.reset_token == kwargs[key])
-
         try:
+            query = self._session.query(User).filter_by(**kwargs)
             user = query.first()
             if user is None:
-                raise NoResultFound("No user found matching the search criteria.")
+                raise NoResultFound("No user found.")
             return user
         except NoResultFound:
             raise NoResultFound("No user found matching the search criteria.")
+        except InvalidRequestError as e:
+            raise InvalidRequestError(f"Invalid query arguments: {e}")
