@@ -4,8 +4,11 @@ Create a class BasicAuth that inherits from Auth
 """
 
 from api.v1.auth.auth import Auth
-from typing import Tuple
+from typing import Tuple, TypeVar
+from models.user import User
 import base64
+
+User = TypeVar('User')
 
 
 class BasicAuth(Auth):
@@ -44,3 +47,20 @@ class BasicAuth(Auth):
 
         email, passwd = decoded_base64_authorization_header.split(':', 1)
         return email, passwd
+
+    def user_object_from_credentials(
+            self, user_email: str, user_pwd: str) -> User:
+        """Returns a User object based on provided credentials."""
+
+        if not isinstance(user_email, str) or not isinstance(user_pwd, str):
+            return None
+
+        User.load_from_file()
+        if User.count() == 0:
+            return None
+
+        users = User.search({'email': user_email})
+        if not users:
+            return None
+
+        user = users[0]
