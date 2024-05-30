@@ -54,11 +54,13 @@ class BasicAuth(Auth):
             return None
 
         User.load_from_file()
-        if User.count() == 0:
+        count = User.count()
+        if not count:
             return None
-
         users = User.search({'email': user_email})
         if not users:
             return None
-
         user = users[0]
+        if user.is_valid_password(user_pwd):
+            return user
+        return None
